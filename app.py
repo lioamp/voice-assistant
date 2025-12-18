@@ -12,11 +12,14 @@ def main():
         print(i)
         time.sleep(1)
 
+    # Record audio
     audio_file = record_audio(filename="input.wav", duration=DURATION, device=MIC_INDEX)
 
-    text, sentiment, scores, intent, emotion, insight, actions = process_audio(audio_file)
+    # Process audio (returns a dictionary with all info)
+    result = process_audio(audio_file)
 
-    format_output(text, sentiment, scores, insight, actions, intent=intent, emotion=emotion)
+    # Format and print results
+    format_output(result)
 
 if __name__ == "__main__":
     main()

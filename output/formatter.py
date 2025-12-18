@@ -1,19 +1,20 @@
-def format_output(text, sentiment, scores, insight, actions, intent=None, emotion=None):
+def format_output(result):
+    """
+    Nicely formats and prints the assistant's results.
+    Expects a dictionary from process_audio().
+    """
     print("\n=== TRANSCRIPTION ===")
-    print(text)
+    print(result["text"])
 
     print("\n=== ANALYSIS ===")
-    print(f"Sentiment: {sentiment}")
-    print(f"Scores: {scores}")
-
-    if intent:
-        print(f"Intent: {intent}")
-    if emotion:
-        print(f"Emotion: {emotion}")
+    print(f"Sentiment: {result['sentiment']}")
+    print(f"Scores: {result['scores']}")
+    print(f"Intent: {result['intent']}")
+    print(f"Emotion: {result['emotion']}")
 
     print("\n=== INSIGHT ===")
-    print(insight)
+    print(result["insight"])
 
     print("\n=== SUGGESTED ACTIONS ===")
-    for i, action in enumerate(actions, 1):
-        print(f"{i}. {action}")
+    for idx, action in enumerate(result["actions"], 1):
+        print(f"{idx}. {action}")
