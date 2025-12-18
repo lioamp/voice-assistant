@@ -1,7 +1,7 @@
 import time
 from audio.mic_input import record_audio
 from output.formatter import format_output
-from engine import process_audio
+from decision.engine import process_audio
 
 MIC_INDEX = 1  # replace with your mic's index from sd.query_devices()
 DURATION = 5   # seconds to record
