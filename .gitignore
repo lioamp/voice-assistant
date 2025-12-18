@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+*.sqlite3
+
+# Audio
+*.wav
+*.mp3
+
+# IDEs
+.vscode/
+.idea/
