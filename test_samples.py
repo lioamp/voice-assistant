@@ -1,32 +1,20 @@
-from audio.speech_to_text import transcribe_audio
 from nlp.sentiment import analyze_sentiment
 from nlp.intent import classify_intent
 from nlp.emotion import detect_emotion
+from decision.engine import ACTION_MAP
+from output.formatter import format_output
 
-# Map similar or redundant actions to canonical forms
-ACTION_MAP = {
-    # Positive reinforcement
-    "Acknowledge and reinforce positive behavior": "Reinforce positive behavior",
-    "Reinforce positive behavior and encourage continuation": "Reinforce positive behavior",
-    "Reinforce positive outcomes and encourage continuation": "Reinforce positive behavior",
-    
-    # Empathy / stress relief
-    "Offer empathy or stress-relief suggestions": "Provide empathy and stress relief",
-    "Offer empathy and problem-solving steps": "Provide empathy and problem solving",
-    "Suggest stress-relief techniques or prioritize tasks": "Provide stress-relief suggestions",
-    
-    # Guidance / instructions
-    "Provide actionable guidance or recommendations": "Provide actionable guidance",
-    "Provide clear instructions or clarify objectives": "Clarify instructions and objectives"
-}
+def deduplicate_actions(actions):
+    """Deduplicate and canonicalize actions."""
+    deduped = []
+    for action in actions:
+        canonical = ACTION_MAP.get(action, action)
+        if canonical not in deduped:
+            deduped.append(canonical)
+    return deduped[:5]  # limit to 5 actions for readability
 
-def process_audio(audio_file):
-    """
-    Core processing function for the voice assistant.
-    Returns a dictionary with transcription, sentiment, intent, emotion,
-    insight, and deduplicated, canonical suggested actions.
-    """
-    text = transcribe_audio(audio_file)
+def process_audio_text_only(text):
+    """Process a text string for testing purposes."""
     sentiment, scores = analyze_sentiment(text)
     intent = classify_intent(text)
     emotion = detect_emotion(text)
@@ -73,12 +61,7 @@ def process_audio(audio_file):
     elif emotion == "Joy":
         actions.append("Reinforce positive outcomes and encourage continuation")
 
-    # Deduplicate and map to canonical forms
-    deduped_actions = []
-    for action in actions:
-        canonical = ACTION_MAP.get(action, action)
-        if canonical not in deduped_actions:
-            deduped_actions.append(canonical)
+    deduped_actions = deduplicate_actions(actions)
 
     return {
         "text": text,
@@ -89,3 +72,24 @@ def process_audio(audio_file):
         "insight": insight,
         "actions": deduped_actions
     }
+
+# -------------------------
+# Sample sentences to test
+# -------------------------
+test_sentences = [
+    "I'm extremely stressed about finishing this report on time.",
+    "Thank you so much for your guidance, it really helped me!",
+    "Can you give me advice on how to handle this client issue?",
+    "I feel frustrated because nothing seems to work as expected.",
+    "I'm happy we managed to complete the project ahead of schedule!",
+    "I don't understand what steps I should take next.",
+    "Here is the latest update on our progress with the tasks.",
+    "I feel overwhelmed and anxious about all these deadlines."
+]
+
+# Run tests
+if __name__ == "__main__":
+    for idx, sentence in enumerate(test_sentences, 1):
+        print(f"\n--- Test {idx} ---")
+        result = process_audio_text_only(sentence)
+        format_output(result)
