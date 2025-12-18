@@ -5,16 +5,16 @@ from decision.engine import ACTION_MAP
 from output.formatter import format_output
 
 def deduplicate_actions(actions):
-    """Deduplicate and canonicalize actions."""
+    """Deduplicate and canonicalize actions, limit to 5 for readability."""
     deduped = []
     for action in actions:
         canonical = ACTION_MAP.get(action, action)
         if canonical not in deduped:
             deduped.append(canonical)
-    return deduped[:5]  # limit to 5 actions for readability
+    return deduped[:5]
 
 def process_audio_text_only(text):
-    """Process a text string for testing purposes."""
+    """Process a text string for testing purposes with full enhanced intent and emotion mapping."""
     sentiment, scores = analyze_sentiment(text)
     intent = classify_intent(text)
     emotion = detect_emotion(text)
@@ -25,7 +25,7 @@ def process_audio_text_only(text):
     if sentiment == "positive":
         insight = "User expresses positive engagement or satisfaction."
         actions.append("Reinforce current approach")
-        if intent == "Gratitude":
+        if intent in ["Gratitude", "Advice_Request"]:
             actions.append("Acknowledge and reinforce positive behavior")
     elif sentiment == "negative":
         insight = "User expresses dissatisfaction, concern, or pressure."
@@ -42,25 +42,32 @@ def process_audio_text_only(text):
         ])
 
     # Intent-based actions
-    if intent == "Advice_Request":
-        actions.append("Provide actionable guidance or recommendations")
-    elif intent == "Vent":
-        actions.append("Offer empathy or stress-relief suggestions")
-    elif intent == "Information":
-        actions.append("Provide clear and concise updates")
-    elif intent == "Gratitude":
-        actions.append("Reinforce positive behavior and encourage continuation")
+    intent_action_map = {
+        "Advice_Request": "Provide actionable guidance or recommendations",
+        "Vent": "Provide empathy and support",
+        "Information": "Provide clear and concise updates",
+        "Gratitude": "Reinforce positive behavior and encourage continuation"
+    }
+    if intent in intent_action_map:
+        actions.append(intent_action_map[intent])
 
-    # Emotion-based actions
-    if emotion == "Stress":
-        actions.append("Suggest stress-relief techniques or prioritize tasks")
-    elif emotion == "Frustration":
-        actions.append("Offer empathy and problem-solving steps")
-    elif emotion == "Confusion":
-        actions.append("Provide clear instructions or clarify objectives")
-    elif emotion == "Joy":
-        actions.append("Reinforce positive outcomes and encourage continuation")
+    # Emotion-based actions (expanded)
+    emotion_action_map = {
+        "Stress": "Provide stress-relief suggestions",
+        "Anxiety": "Provide stress-relief suggestions",
+        "Frustration": "Provide empathy and problem solving",
+        "Confusion": "Clarify instructions and objectives",
+        "Joy": "Reinforce positive behavior",
+        "Gratitude": "Reinforce positive behavior",
+        "Sadness": "Provide empathy and support",
+        "Surprise": "Acknowledge and clarify unexpected developments",
+        "Relief": "Reinforce positive outcomes",
+        "Excitement": "Encourage and channel energy positively"
+    }
+    if emotion in emotion_action_map:
+        actions.append(emotion_action_map[emotion])
 
+    # Deduplicate actions and limit for readability
     deduped_actions = deduplicate_actions(actions)
 
     return {
@@ -84,7 +91,11 @@ test_sentences = [
     "I'm happy we managed to complete the project ahead of schedule!",
     "I don't understand what steps I should take next.",
     "Here is the latest update on our progress with the tasks.",
-    "I feel overwhelmed and anxious about all these deadlines."
+    "I feel overwhelmed and anxious about all these deadlines.",
+    "I'm excited about the upcoming team event!",
+    "I am relieved the project was completed successfully.",
+    "I feel sad about missing the deadline yesterday.",
+    "Wow, I'm surprised by the unexpected changes in the schedule."
 ]
 
 # Run tests
